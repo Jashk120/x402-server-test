@@ -5,7 +5,7 @@
 
 use serde::{Deserialize, Serialize};
 
-// ── Inbound: what an agent sends us in the Payment-Token header ───────────────
+// ── Inbound: what an agent sends us in the PAYMENT-SIGNATURE header ───────────────
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct PaymentPayload {

@@ -2,13 +2,13 @@
 //!
 //! Routes
 //! ──────
-//!   GET  /protected          — gated resource; demands a Payment-Token
+//!   GET  /protected          — gated resource; demands a PAYMENT-SIGNATURE
 //!   GET  /protected/:path    — same, arbitrary sub-paths for future use
 //!   GET  /health             — liveness probe (no payment required)
 //!
 //! Flow
 //! ────
-//!  1. No Payment-Token header → 402 + requirements JSON
+//!  1. No PAYMENT-SIGNATURE header → 402 + requirements JSON
 //!  2. Token present → base64-decode → JSON-decode PaymentPayload
 //!  3. POST payload to facilitator /verify
 //!  4. Verified → 200 with resource content
@@ -53,9 +53,9 @@ pub async fn protected_path(
 // ── Core logic ────────────────────────────────────────────────────────────────
 
 async fn protected_inner(state: AppState, headers: HeaderMap, resource: String) -> Response {
-    // 1. Check for Payment-Token header
+    // 1. Check for PAYMENT-SIGNATURE header
     let token = headers
-        .get("Payment-Token")
+        .get("PAYMENT-SIGNATURE")
         .and_then(|v| v.to_str().ok())
         .map(|s| s.to_string());
 
@@ -98,10 +98,10 @@ async fn attempt_access(state: &AppState, token: &str, resource: &str) -> Respon
     let decoded = match STANDARD.decode(token) {
         Ok(b) => b,
         Err(e) => {
-            warn!("Payment-Token base64 decode failed: {}", e);
+            warn!("PAYMENT-SIGNATURE base64 decode failed: {}", e);
             return (
                 StatusCode::BAD_REQUEST,
-                Json(json!({ "error": "Invalid Payment-Token encoding" })),
+                Json(json!({ "error": "Invalid PAYMENT-SIGNATURE encoding" })),
             ).into_response();
         }
     };
@@ -109,10 +109,10 @@ async fn attempt_access(state: &AppState, token: &str, resource: &str) -> Respon
     let payload: PaymentPayload = match serde_json::from_slice(&decoded) {
         Ok(p) => p,
         Err(e) => {
-            warn!("Payment-Token JSON decode failed: {}", e);
+            warn!("PAYMENT-SIGNATURE JSON decode failed: {}", e);
             return (
                 StatusCode::BAD_REQUEST,
-                Json(json!({ "error": "Invalid Payment-Token structure" })),
+                Json(json!({ "error": "Invalid PAYMENT-SIGNATURE structure" })),
             ).into_response();
         }
     };
