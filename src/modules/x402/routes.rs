@@ -132,7 +132,7 @@ async fn attempt_access(state: &AppState, token: &str, resource: &str) -> Respon
     let verify_url = format!("{}/verify", cfg.facilitator_url.trim_end_matches('/'));
     let verify_body = json!({
         "paymentPayload": payload,
-        "paymentRequirements": requirements,
+        "paymentRequirements": payload.accepted,
     });
 
     let verify_res = state.http

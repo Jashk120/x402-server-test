@@ -14,6 +14,7 @@ use crate::state::AppState;
 
 pub fn router() -> Router<AppState> {
     Router::new()
+        .route("/",                  get(routes::protected_root))
         .route("/health",            get(routes::health))
         .route("/protected",         get(routes::protected_root))
         .route("/protected/:path",   get(routes::protected_path))
