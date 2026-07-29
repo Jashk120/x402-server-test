@@ -42,7 +42,7 @@ impl Config {
             x402_amount:      env_or("X402_AMOUNT",      "100000000"),
             x402_asset:       env_or("X402_ASSET",       "0.0.0"),
             x402_network:     env_or("X402_NETWORK",     "hedera:testnet"),
-            facilitator_url:  env_or("FACILITATOR_URL",  "https://x402.org/facilitator"),
+            facilitator_url:  env_or("FACILITATOR_URL",  "https://api.testnet.blocky402.com"),
             hedera_network:   env_or("HEDERA_NETWORK",   "testnet"),
             node_did:         std::env::var("NODE_DID").ok(),
         }
