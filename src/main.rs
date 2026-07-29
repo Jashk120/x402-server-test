@@ -45,9 +45,10 @@ async fn main() {
     info!("╔══════════════════════════════════════════════╗");
     info!("║            ARIA Node  v0.1.0                 ║");
     info!("╠══════════════════════════════════════════════╣");
+    info!("║  Public Base   →  GET /                      ║");
     info!("║  x402 gateway  →  GET /protected             ║");
-    info!("║  DID registry  →  /did/*    [stub]           ║");
-    info!("║  A2A protocol  →  /agent/*  [stub]           ║");
+    info!("║  DID registry  →  /did/*    [active]         ║");
+    info!("║  A2A protocol  →  /agent/*  [active]         ║");
     info!("║  Health        →  GET /health                ║");
     info!("╚══════════════════════════════════════════════╝");
     info!("Listening on http://{}", addr);

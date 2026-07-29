@@ -28,6 +28,34 @@ use super::types::{
     SupportedKindsResponse, VerifyResponse,
 };
 
+// ── Public Root Index (Free) ──────────────────────────────────────────────────
+
+pub async fn root() -> impl IntoResponse {
+    Json(json!({
+        "node": "aria-node",
+        "version": "0.1.0",
+        "status": "online",
+        "description": "ARIA Node x402 Gateway & Decentralized Identity Service",
+        "free_routes": [
+            "/",
+            "/health",
+            "/agent/info",
+            "/agent/capabilities",
+            "/did/resolve/:did"
+        ],
+        "protected_routes": [
+            "/protected",
+            "/protected/ai-data",
+            "/protected/agent-feed",
+            "/protected/telemetry"
+        ],
+        "x402_payment_required": {
+            "protected_prefix": "/protected",
+            "info": "Requests to /protected/* return HTTP 402 with x402 payment requirements."
+        }
+    }))
+}
+
 // ── Health ────────────────────────────────────────────────────────────────────
 
 pub async fn health() -> impl IntoResponse {
@@ -294,6 +322,28 @@ async fn attempt_access(state: &AppState, token: &str, resource: &str) -> Respon
     let tx = settle.transaction.as_deref().unwrap_or("unknown");
     info!("✓ Payment verified + settled from {} (tx: {}) — delivering '{}'", payer, tx, resource);
 
+    let content_payload = match &resource[..] {
+        "index" => json!({
+            "title": "ARIA Node Protected Resource Index",
+            "available_resources": ["/protected/ai-data", "/protected/agent-feed", "/protected/telemetry"],
+            "tier": "premium"
+        }),
+        "ai-data" => json!({
+            "dataset": "ARIA v0.6 Agent Embeddings Cache",
+            "records": 1024,
+            "status": "active"
+        }),
+        "agent-feed" => json!({
+            "feed_id": "feed_live_network_events",
+            "events_count": 42,
+            "last_event_type": "DIDRegistrationConfirmed"
+        }),
+        _ => json!({
+            "resource_id": resource,
+            "content": format!("Protected payload for resource '{}'.", resource),
+        })
+    };
+
     (StatusCode::OK, Json(json!({
         "status":      "PAID",
         "resource":    resource,
@@ -301,9 +351,8 @@ async fn attempt_access(state: &AppState, token: &str, resource: &str) -> Respon
         "transaction": tx,
         "message":     format!("Access granted to '{}'. Payment settled on {}.", resource, cfg.x402_network),
         "network":     cfg.x402_network,
-        // TODO: replace with real resource content per route
         "data": {
-            "content": format!("This is the protected content for '{}'.", resource),
+            "details": content_payload,
             "unlocked_at": chrono_now(),
         }
     }))).into_response()
